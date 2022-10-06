@@ -29,7 +29,7 @@ class _LoggedState extends State<Logged> {
         title: Text(person?.displayName ?? "Loading..."),
         actions: [
           IconButton(
-              onPressed: () => {Pronote.fromNeo(widget.neo)},
+              onPressed: () => {getPronoteSession(widget.neo)},
               icon: const Icon(Icons.refresh))
         ],
       ),

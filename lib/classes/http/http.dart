@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cookie_jar/cookie_jar.dart';
 import 'dart:io';
 
@@ -24,7 +26,33 @@ Future<HttpClientResponse> get(Uri url,
 
   HttpClientResponse res = await clientRequest.close();
 
-  logger.i(res.headers);
+  return res;
+}
+
+Future<HttpClientResponse> post(Uri url,
+    {Map<String, String>? headers,
+    CookieJar? cookieJar,
+    String? content}) async {
+  HttpClient client = HttpClient();
+  client.userAgent = userAgent;
+
+  HttpClientRequest clientRequest = await client.postUrl(url);
+
+  cookieJar != null
+      ? clientRequest.cookies.addAll(await cookieJar.loadForRequest(url))
+      : {};
+
+  logger.i(await cookieJar?.loadForRequest(url));
+
+  headers != null
+      ? headers.forEach((key, value) {
+          clientRequest.headers.set(key, value);
+        })
+      : {};
+
+  clientRequest.add(utf8.encode(content ?? ""));
+
+  HttpClientResponse res = await clientRequest.close();
 
   return res;
 }

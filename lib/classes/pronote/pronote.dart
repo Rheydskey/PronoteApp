@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/dom.dart';
@@ -6,41 +7,99 @@ import 'package:html/parser.dart';
 import 'package:neo2/classes/http/http.dart';
 import 'package:neo2/classes/neo.dart';
 import 'package:neo2/classes/pronote/crypto.dart';
+import 'package:neo2/classes/pronote/request.dart';
 import 'package:neo2/main.dart';
 
 class Pronote {
+  Uri url;
+  int requestCount = -1;
   Cipher? _cipher;
+  int sessionId;
+  int sessionType;
+
   CookieJar cookieManager = CookieJar();
 
-  Pronote(this.cookieManager);
+  Pronote(this.url, this.cookieManager, this.sessionId, this.sessionType);
 
   Cipher getCipher() => _cipher!;
 
   void setCipher(Cipher cipher) => _cipher = cipher;
 
-  void getUUID() {}
+  Future<String> getFonctionParametres() async {
+    request(this, "FonctionParametres", content: {
+      "donnees": {"Uuid": getUUID(), "identifiantNav": null}
+    });
 
-  static Future<Pronote> fromNeo(Neo neo) async {
-    Pronote pronote = Pronote(neo.cookieManager);
-
-    var res = await get(
-        Uri.parse(
-            "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
-        headers: {"referer": "https://ent.l-educdenormandie.fr/"},
-        cookieJar: neo.cookieManager);
-
-    String body = await res.transform(utf8.decoder).join();
-
-    Document parsed = HtmlParser(body).parse();
-    String? onload =
-        parsed.getElementsByTagName("body")[0].attributes['onload'];
-
-    String? trimmed = onload
-        ?.replaceAll("try { Start (", "")
-        .replaceAll(") } catch (e) { messageErreur (e) }", "");
-
-    logger.i(trimmed);
-
-    return pronote;
+    return "";
   }
+
+  String getUUID() {
+    List<int> iv = _cipher!.aesIv.iv;
+    String base =
+        base64Encode(_cipher!.rsaData(Uint8List.fromList(iv)).toList());
+    logger.i(base);
+    String result = "";
+    int countofsubstring = (base.length / 64).floor();
+    for (var i = 0; i < countofsubstring; i++) {
+      result += "${base.substring(i * 64, (i + 1) * 64)}\r\n";
+    }
+
+    result += base.substring(result.length, base.length);
+
+    return result;
+  }
+}
+
+Future<Pronote> getPronoteSession(Neo neo) async {
+  var res = await get(
+      Uri.parse(
+          "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
+      headers: {"referer": "https://ent.l-educdenormandie.fr/"},
+      cookieJar: neo.cookieManager);
+
+  neo.cookieManager.saveFromResponse(
+      Uri.parse(
+          "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
+      res.cookies);
+  String body = await res.transform(utf8.decoder).join();
+
+  Document parsed = HtmlParser(body).parse();
+  String? onload = parsed.getElementsByTagName("body")[0].attributes['onload'];
+  if (!(onload?.startsWith("try { Start ({") ?? false)) {
+    throw FormatException("bad body : $body");
+  }
+
+  String trimmed = onload
+          ?.replaceAll("try { Start ({", "")
+          .replaceAll("}) } catch (e) { messageErreur (e) }", "") ??
+      "{}";
+
+  /// Parsing default values
+  List<String> split = trimmed
+      .split(':')
+      .map((e) => e.split(","))
+      .expand((element) => element)
+      .map((e) => e.replaceAll('\'', '').trim())
+      .toList();
+
+  Map<String, String> map = {};
+
+  for (var i = 0; i < split.length - 1; i += 2) {
+    map.addAll({split[i]: split[i + 1]});
+  }
+
+  Pronote pronote = Pronote(
+      Uri.parse("https://0760095R.index-education.net/pronote/"),
+      neo.cookieManager,
+      int.parse(map['h']!),
+      3);
+
+  Cipher cipher =
+      Cipher(RsaKey(BigInt.parse(map['ER']!), BigInt.parse("0x${map['MR']!}")));
+
+  pronote.setCipher(cipher);
+
+  pronote.getFonctionParametres();
+
+  return pronote;
 }
