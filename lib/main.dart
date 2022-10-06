@@ -38,7 +38,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Login login = Login();
   List<Cookie>? _cookies;
-  bool _finish = false;
 
   @override
   void initState() {

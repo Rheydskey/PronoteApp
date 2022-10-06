@@ -1,46 +1,45 @@
+import 'dart:convert';
+
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'package:neo2/classes/http/http.dart';
 import 'package:neo2/classes/neo.dart';
 import 'package:neo2/classes/pronote/crypto.dart';
 import 'package:neo2/main.dart';
 
 class Pronote {
   Cipher? _cipher;
-  CookieManager cookieManager = CookieManager(CookieJar());
-  Dio dio = Dio();
+  CookieJar cookieManager = CookieJar();
 
-  Pronote(CookieManager cookieManager) {
-    dio.interceptors.add(cookieManager);
-  }
+  Pronote(this.cookieManager);
 
   Cipher getCipher() => _cipher!;
 
-  void setCipher(Cipher cipher) => this._cipher = cipher;
+  void setCipher(Cipher cipher) => _cipher = cipher;
 
   void getUUID() {}
 
   static Future<Pronote> fromNeo(Neo neo) async {
     Pronote pronote = Pronote(neo.cookieManager);
 
-    var res = await pronote.dio.get(
-        "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/",
-        options:
-            Options(headers: {"referer": "https://ent.l-educdenormandie.fr/"}));
+    var res = await get(
+        Uri.parse(
+            "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
+        headers: {"referer": "https://ent.l-educdenormandie.fr/"},
+        cookieJar: neo.cookieManager);
 
-    var body = res.data;
+    String body = await res.transform(utf8.decoder).join();
 
-    var stringBody = body as String;
+    Document parsed = HtmlParser(body).parse();
+    String? onload =
+        parsed.getElementsByTagName("body")[0].attributes['onload'];
 
-    logger.i(stringBody.split("").length);
+    String? trimmed = onload
+        ?.replaceAll("try { Start (", "")
+        .replaceAll(") } catch (e) { messageErreur (e) }", "");
 
-    if (body is! String) {
-      throw FormatException("Body is not a string");
-    }
-    print(body);
-    var parsed = HtmlParser(body as String).parse();
-    print(parsed.getElementsByTagName("body")[0]);
+    logger.i(trimmed);
 
     return pronote;
   }

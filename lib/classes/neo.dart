@@ -1,8 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
-
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
+import 'package:neo2/classes/http/http.dart';
 
 class Person {
   String id;
@@ -43,26 +42,24 @@ class Schools {
 }
 
 class Neo {
-  CookieManager cookieManager = CookieManager(CookieJar());
-  Dio dio = Dio();
+  CookieJar cookieManager = CookieJar();
 
   Neo({required List<Cookie> educ}) {
-    dio.interceptors.add(cookieManager);
-
-    cookieManager.cookieJar.saveFromResponse(
+    cookieManager.saveFromResponse(
         Uri.parse("https://ent.l-educdenormandie.fr/userbook/api/person"),
         educ);
   }
 
   void printCookies() async {
-    print(await cookieManager.cookieJar
+    print(await cookieManager
         .loadForRequest(Uri.parse("https://ent.l-educdenormandie.fr")));
   }
 
   Future<Person> getPerson() async {
-    var e =
-        await dio.get("https://ent.l-educdenormandie.fr/userbook/api/person");
-
-    return Person.fromJson(e.data['result'][0]);
+    var e = await get(
+        Uri.parse("https://ent.l-educdenormandie.fr/userbook/api/person"),
+        cookieJar: cookieManager);
+    var json = jsonDecode(await e.transform(utf8.decoder).join());
+    return Person.fromJson(json['result'][0]);
   }
 }

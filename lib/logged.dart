@@ -5,7 +5,7 @@ import 'package:neo2/classes/pronote/pronote.dart';
 class Logged extends StatefulWidget {
   final Neo neo;
 
-  Logged(this.neo, {super.key});
+  const Logged(this.neo, {super.key});
 
   @override
   State<StatefulWidget> createState() => _LoggedState();
@@ -30,7 +30,7 @@ class _LoggedState extends State<Logged> {
         actions: [
           IconButton(
               onPressed: () => {Pronote.fromNeo(widget.neo)},
-              icon: Icon(Icons.refresh))
+              icon: const Icon(Icons.refresh))
         ],
       ),
       body:
