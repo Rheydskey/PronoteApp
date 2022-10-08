@@ -15,7 +15,7 @@ void request(Pronote session, String name,
 
   String order = await aes.aesToHexa(session.requestCount.toString());
   Uri url = Uri.parse(
-      "${session.url.toString()}/appelfonction/3/${session.sessionId}/$order");
+      "${session.url.toString()}appelfonction/3/${session.sessionId}/$order");
   String body = jsonEncode({
     "nom": name,
     "numeroOrdre": order,

@@ -6,6 +6,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:cryptography/dart.dart';
 import 'package:crypton/crypton.dart';
 import 'package:archive/archive_io.dart' as archive_io;
+import 'package:neo2/main.dart';
 
 class Compression {
   static List<int> deflate(List<int> data) {
@@ -27,7 +28,7 @@ class RsaKey {
   BigInt modulus;
   BigInt exponent;
 
-  RsaKey(this.exponent, this.modulus);
+  RsaKey({required this.exponent, required this.modulus});
 
   RSAPublicKey getKey() {
     return RSAPublicKey(modulus, exponent);
@@ -39,9 +40,13 @@ class AesIv {
 
   AesIv() {
     List<int> bytes = [];
-    for (var i = 0; 0 >= 16; i++) {
-      bytes.add(Random().nextInt(double.maxFinite.toInt()));
+
+    for (var i = 0; i < 16; i++) {
+      bytes.add(Random().nextInt(1 << 32));
     }
+
+    logger.i(bytes.length);
+
     iv = bytes;
   }
 }
@@ -54,10 +59,13 @@ class Aes {
     DartAesCbc aes = const DartAesCbc(macAlgorithm: MacAlgorithm.empty);
 
     List<int> iv = aesiv != null ? aesiv.iv : [];
+
     List<int> utf8encoded = disableCompression
         ? utf8.encode(data)
         : Compression.deflate(utf8.encode(data));
+
     String listBytesKey = Md5.getDigest(key);
+
     SecretKey secretKey = SecretKey(utf8.encode(listBytesKey));
 
     SecretBox secretbox =

@@ -35,19 +35,24 @@ class Pronote {
 
   String getUUID() {
     List<int> iv = _cipher!.aesIv.iv;
-    String base =
-        base64Encode(_cipher!.rsaData(Uint8List.fromList(iv)).toList());
+    String base = putrn(
+        base64Encode(_cipher!.rsaData(Uint8List.fromList(iv)).toList()), 64);
     logger.i(base);
-    String result = "";
-    int countofsubstring = (base.length / 64).floor();
-    for (var i = 0; i < countofsubstring; i++) {
-      result += "${base.substring(i * 64, (i + 1) * 64)}\r\n";
-    }
-
-    result += base.substring(result.length, base.length);
-
-    return result;
+    return base;
   }
+}
+
+String putrn(String str, int maxlines) {
+  String result = "";
+  int countofsubstring = (str.length / maxlines).floor() - 1;
+  var i = 0;
+  for (; i <= countofsubstring; i++) {
+    result += "${str.substring(i * maxlines, (i + 1) * maxlines)}\r\n";
+  }
+
+  result += str.substring(result.length - (2 * i), str.length);
+
+  return result;
 }
 
 Future<Pronote> getPronoteSession(Neo neo) async {
@@ -58,9 +63,8 @@ Future<Pronote> getPronoteSession(Neo neo) async {
       cookieJar: neo.cookieManager);
 
   neo.cookieManager.saveFromResponse(
-      Uri.parse(
-          "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
-      res.cookies);
+      Uri.parse("https://0760095R.index-education.net/pronote/"), res.cookies);
+
   String body = await res.transform(utf8.decoder).join();
 
   Document parsed = HtmlParser(body).parse();
@@ -94,8 +98,9 @@ Future<Pronote> getPronoteSession(Neo neo) async {
       int.parse(map['h']!),
       3);
 
-  Cipher cipher =
-      Cipher(RsaKey(BigInt.parse(map['ER']!), BigInt.parse("0x${map['MR']!}")));
+  Cipher cipher = Cipher(RsaKey(
+      exponent: BigInt.parse(map['ER']!),
+      modulus: BigInt.parse("0x${map['MR']!}")));
 
   pronote.setCipher(cipher);
 
