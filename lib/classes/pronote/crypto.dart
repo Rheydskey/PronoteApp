@@ -39,22 +39,27 @@ class RsaKey {
   RSAPublicKey getKey() {
     return RSAPublicKey(modulus, exponent);
   }
+
+  static RsaKey fromString(String exponent, String modulus) => RsaKey(
+      exponent: BigInt.parse(exponent), modulus: BigInt.parse("0x$modulus"));
 }
 
 class AesIv {
-  List<int> iv = [];
+  Uint8List iv;
 
   AesIv(this.iv);
 
-  static AesIv fromRandomBytes() => AesIv.from(() => Random().nextInt(1 << 32));
+  static AesIv fromRandomBytes() =>
+      AesIv.from((random) => random.nextInt(1 << 32));
 
-  static AesIv zeros() => AesIv.from(() => 0);
+  static AesIv zeros() => AesIv.from((_) => 0);
 
-  static AesIv from(int Function() bytesfn) {
-    List<int> bytes = [];
+  static AesIv from(int Function(Random) bytesfn) {
+    final Random generator = Random.secure();
+    Uint8List bytes = Uint8List(16);
 
     for (var i = 0; i < 16; i++) {
-      bytes.add(bytesfn());
+      bytes[i] = bytesfn(generator);
     }
 
     return AesIv(bytes);

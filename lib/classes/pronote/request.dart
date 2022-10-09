@@ -19,9 +19,9 @@ void request(Pronote session, String name,
   Uri url = Uri.parse(
       "${session.url.toString()}appelfonction/${session.sessionType}/${session.sessionId}/$order");
   String body = jsonEncode({
-    "nom": name,
-    "numeroOrdre": order,
     "session": session.sessionId,
+    "numeroOrdre": order,
+    "nom": name,
     "donneesSec": content
   });
 

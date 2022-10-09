@@ -50,11 +50,6 @@ class Neo {
         educ);
   }
 
-  void printCookies() async {
-    print(await cookieManager
-        .loadForRequest(Uri.parse("https://ent.l-educdenormandie.fr")));
-  }
-
   Future<Person> getPerson() async {
     var e = await get(
         Uri.parse("https://ent.l-educdenormandie.fr/userbook/api/person"),

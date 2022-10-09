@@ -8,7 +8,6 @@ import 'package:neo2/classes/http/http.dart';
 import 'package:neo2/classes/neo.dart';
 import 'package:neo2/classes/pronote/crypto.dart';
 import 'package:neo2/classes/pronote/request.dart';
-import 'package:neo2/main.dart';
 
 class Pronote {
   Uri url;
@@ -29,16 +28,18 @@ class Pronote {
 
   Future<String> getFonctionParametres() async {
     request(this, "FonctionParametres", content: {
-      "donnees": {"Uuid": getUUID()}
+      "donnees": {"Uuid": getUUID(), "identifiantNav": null}
     });
 
     return "";
   }
 
   String getUUID() {
-    List<int> iv = _cipher!.aesIv.iv;
     String base = putrn(
-        base64Encode(_cipher!.rsaEncrypt(Uint8List.fromList(iv)).toList()), 64);
+        base64Encode(_cipher!
+            .rsaEncrypt(Uint8List.fromList(AesIv.fromRandomBytes().iv))
+            .toList()),
+        64);
 
     return base;
   }
@@ -111,3 +112,6 @@ Future<Pronote> getPronoteSession(Neo neo) async {
 
   return pronote;
 }
+
+///LZCDzXx+lt48PyAfA/Wf5CKv2mEdC6CmO8nARBlCzG3+LPEKdXjvvYsw2bbRVkli\r\nMgkleVbTcHAAkVxvGCk9maLJTYFfleL03KbCdwPO9/rl8z4A2O5UrBIn2CDg9oJs\r\nJrJgSOYLeK5QoTxpI1qjf7K1WVlzZC/1wpm2uOjQLRQ=
+///ewfJCLxyXWJ1zobtnFzcDeBaS23D7zCgGpDOiWkELhBdw3ewoLvWETEA7Kv5juNi\r\nH4yamKtn2h0phETgujoD2b3PFXQjHWvTvzXwDEtEASHW6Y4ka5tEDBMSad4Kj/KL\r\n1ciSvp/GBgg9SB0NuFySHzi5IMZDd1j/j2Lzu4vwTdE=

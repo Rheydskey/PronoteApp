@@ -23,7 +23,6 @@ class _LoggedState extends State<Logged> {
 
   @override
   Widget build(BuildContext context) {
-    widget.neo.printCookies();
     return Scaffold(
       appBar: AppBar(
         title: Text(person?.displayName ?? "Loading..."),
