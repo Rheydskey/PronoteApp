@@ -12,6 +12,7 @@ import 'package:neo2/main.dart';
 
 class Pronote {
   Uri url;
+  Uri referer;
   int requestCount = -1;
   Cipher? _cipher;
   int sessionId;
@@ -19,7 +20,8 @@ class Pronote {
 
   CookieJar cookieManager = CookieJar();
 
-  Pronote(this.url, this.cookieManager, this.sessionId, this.sessionType);
+  Pronote(this.url, this.referer, this.cookieManager, this.sessionId,
+      this.sessionType);
 
   Cipher getCipher() => _cipher!;
 
@@ -27,7 +29,7 @@ class Pronote {
 
   Future<String> getFonctionParametres() async {
     request(this, "FonctionParametres", content: {
-      "donnees": {"Uuid": getUUID(), "identifiantNav": null}
+      "donnees": {"Uuid": getUUID()}
     });
 
     return "";
@@ -36,8 +38,8 @@ class Pronote {
   String getUUID() {
     List<int> iv = _cipher!.aesIv.iv;
     String base = putrn(
-        base64Encode(_cipher!.rsaData(Uint8List.fromList(iv)).toList()), 64);
-    logger.i(base);
+        base64Encode(_cipher!.rsaEncrypt(Uint8List.fromList(iv)).toList()), 64);
+
     return base;
   }
 }
@@ -94,9 +96,10 @@ Future<Pronote> getPronoteSession(Neo neo) async {
 
   Pronote pronote = Pronote(
       Uri.parse("https://0760095R.index-education.net/pronote/"),
+      res.redirects[1].location,
       neo.cookieManager,
       int.parse(map['h']!),
-      3);
+      int.parse(map['a']!));
 
   Cipher cipher = Cipher(RsaKey(
       exponent: BigInt.parse(map['ER']!),

@@ -40,6 +40,7 @@ dependencies:
   # Pronote
   crypto: ^3.0.2
   cryptography: ^2.0.5
+  encryptions: ^1.1.0+1
   cryptography_flutter: ^2.0.2
   crypton: ^2.0.5
   archive: ^3.3.1

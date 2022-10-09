@@ -19,8 +19,10 @@ class Compression {
 }
 
 class Md5 {
-  static String getDigest(String tohash) {
-    return md5.convert(utf8.encode(tohash)).toString();
+  static String getDigest(String? tohash) {
+    List<int> bytes = tohash != null ? utf8.encode(tohash) : [];
+
+    return md5.convert(bytes).toString();
   }
 }
 
@@ -45,18 +47,22 @@ class AesIv {
       bytes.add(Random().nextInt(1 << 32));
     }
 
-    logger.i(bytes.length);
-
     iv = bytes;
   }
 }
 
 class Aes {
-  String key;
-  Aes(this.key);
+  late String key;
+  Aes({String? key}) {
+    setKey(key);
+  }
+
+  void setKey(String? key) => this.key = Md5.getDigest(key);
+
   Future<List<int>> aesCipher(String data,
       {AesIv? aesiv, bool disableCompression = true}) async {
-    DartAesCbc aes = const DartAesCbc(macAlgorithm: MacAlgorithm.empty);
+    DartAesCbc aes =
+        const DartAesCbc(macAlgorithm: MacAlgorithm.empty, secretKeyLength: 16);
 
     List<int> iv = aesiv != null ? aesiv.iv : [];
 
@@ -64,9 +70,7 @@ class Aes {
         ? utf8.encode(data)
         : Compression.deflate(utf8.encode(data));
 
-    String listBytesKey = Md5.getDigest(key);
-
-    SecretKey secretKey = SecretKey(utf8.encode(listBytesKey));
+    SecretKey secretKey = SecretKey(utf8.encode(key));
 
     SecretBox secretbox =
         await aes.encrypt(utf8encoded, secretKey: secretKey, nonce: iv);
@@ -92,11 +96,7 @@ class Cipher {
   }
 
   /// Return base64
-  String rsaString(String data) {
-    return rsaKey.getKey().encrypt(data);
-  }
+  String rsaEncryptString(String data) => rsaKey.getKey().encrypt(data);
 
-  Uint8List rsaData(Uint8List data) {
-    return rsaKey.getKey().encryptData(data);
-  }
+  Uint8List rsaEncrypt(Uint8List data) => rsaKey.getKey().encryptData(data);
 }

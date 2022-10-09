@@ -42,7 +42,7 @@ Future<HttpClientResponse> post(Uri url,
       ? clientRequest.cookies.addAll(await cookieJar.loadForRequest(url))
       : {};
 
-  logger.i(await cookieJar?.loadForRequest(url));
+  logger.i("$url <= $content");
 
   headers != null
       ? headers.forEach((key, value) {
