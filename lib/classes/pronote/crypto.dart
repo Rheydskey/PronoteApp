@@ -3,10 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:cryptography/dart.dart';
 import 'package:crypton/crypton.dart';
 import 'package:archive/archive_io.dart' as archive_io;
-import 'package:neo2/main.dart';
 
 class Compression {
   static List<int> deflate(List<int> data) {
@@ -19,11 +17,17 @@ class Compression {
 }
 
 class Md5 {
-  static String getDigest(String? tohash) {
+  static Digest getDigest(String? tohash) {
     List<int> bytes = tohash != null ? utf8.encode(tohash) : [];
 
-    return md5.convert(bytes).toString();
+    return md5.convert(bytes);
   }
+
+  static List<int> getBytes(String? tohash) => getDigest(tohash).bytes;
+  static List<int> getDigestUtf8(String? tohash) =>
+      utf8.encode(getDigestString(tohash));
+
+  static String getDigestString(String? tohash) => getDigest(tohash).toString();
 }
 
 class RsaKey {
@@ -40,37 +44,42 @@ class RsaKey {
 class AesIv {
   List<int> iv = [];
 
-  AesIv() {
+  AesIv(this.iv);
+
+  static AesIv fromRandomBytes() => AesIv.from(() => Random().nextInt(1 << 32));
+
+  static AesIv zeros() => AesIv.from(() => 0);
+
+  static AesIv from(int Function() bytesfn) {
     List<int> bytes = [];
 
     for (var i = 0; i < 16; i++) {
-      bytes.add(Random().nextInt(1 << 32));
+      bytes.add(bytesfn());
     }
 
-    iv = bytes;
+    return AesIv(bytes);
   }
 }
 
 class Aes {
-  late String key;
+  late List<int> key;
   Aes({String? key}) {
     setKey(key);
   }
 
-  void setKey(String? key) => this.key = Md5.getDigest(key);
+  void setKey(String? key) => this.key = Md5.getBytes(key);
 
   Future<List<int>> aesCipher(String data,
       {AesIv? aesiv, bool disableCompression = true}) async {
-    DartAesCbc aes =
-        const DartAesCbc(macAlgorithm: MacAlgorithm.empty, secretKeyLength: 16);
+    AesCbc aes = AesCbc.with128bits(macAlgorithm: MacAlgorithm.empty);
 
-    List<int> iv = aesiv != null ? aesiv.iv : [];
+    List<int> iv = aesiv != null ? aesiv.iv : AesIv.zeros().iv;
 
     List<int> utf8encoded = disableCompression
         ? utf8.encode(data)
         : Compression.deflate(utf8.encode(data));
 
-    SecretKey secretKey = SecretKey(utf8.encode(key));
+    SecretKey secretKey = SecretKey(key);
 
     SecretBox secretbox =
         await aes.encrypt(utf8encoded, secretKey: secretKey, nonce: iv);
@@ -87,7 +96,7 @@ class Aes {
 class Cipher {
   RsaKey rsaKey;
   Aes? aes;
-  AesIv aesIv = AesIv();
+  AesIv aesIv = AesIv.zeros();
 
   Cipher(this.rsaKey, {this.aes});
 
