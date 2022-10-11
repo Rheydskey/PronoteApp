@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -14,12 +15,11 @@ class Login {
   bool get isFinish => _tokenOk;
 
   Future<void> loginme() async {
-    await _controller?.runJavascriptReturningResult(
-        "document.getElementById(\"username\").value = '$user'");
-    await _controller?.runJavascriptReturningResult(
-        "document.getElementById(\"password\").value = '$password'");
-    await _controller?.runJavascriptReturningResult(
-        "document.getElementById(\"bouton_valider\").click()");
+    await _controller?.runJavascriptReturningResult("""
+    document.getElementById("username").value = '$user';
+    document.getElementById("password").value = '$password';
+    document.getElementById("bouton_valider").click();
+    """);
   }
 
   Future<List<Cookie>> getEducDeNomandieCookies() async {

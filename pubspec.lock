@@ -8,13 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.3.1"
-  asn1lib:
-    dependency: transitive
-    description:
-      name: asn1lib
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.1"
   async:
     dependency: transitive
     description:
@@ -85,13 +78,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
-  crypton:
-    dependency: transitive
-    description:
-      name: crypton
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.5"
   csslib:
     dependency: transitive
     description:
@@ -125,6 +111,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_inappwebview:
+    dependency: "direct main"
+    description:
+      name: flutter_inappwebview
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.4.4+3"
   flutter_lints:
     dependency: "direct dev"
     description:
