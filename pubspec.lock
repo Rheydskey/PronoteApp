@@ -2,7 +2,7 @@
 # See https://dart.dev/tools/pub/glossary#lockfile
 packages:
   archive:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: archive
       url: "https://pub.dartlang.org"
@@ -65,28 +65,28 @@ packages:
     source: hosted
     version: "3.0.1"
   crypto:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
   cryptography:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: cryptography
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.5"
   cryptography_flutter:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: cryptography_flutter
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
   crypton:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: crypton
       url: "https://pub.dartlang.org"
@@ -201,7 +201,7 @@ packages:
     source: hosted
     version: "2.1.3"
   pointycastle:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pointycastle
       url: "https://pub.dartlang.org"
