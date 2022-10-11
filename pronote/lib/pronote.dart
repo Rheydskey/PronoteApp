@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
-import 'package:neo2/classes/http/http.dart';
-import 'package:neo2/classes/neo.dart';
-import 'package:neo2/classes/pronote/crypto.dart';
-import 'package:neo2/classes/pronote/request.dart';
+import 'package:pronote/http/http.dart';
+import 'package:pronote/crypto.dart';
+import 'package:pronote/crypto/rsa.dart';
+import 'package:pronote/request.dart';
 
 class Pronote {
   Uri url;
@@ -35,11 +33,10 @@ class Pronote {
   }
 
   String getUUID() {
+    String hexaIv = "SnjyOlbqWY86H1Wa9NvqLA==";
+
     String base = putrn(
-        base64Encode(_cipher!
-            .rsaEncrypt(Uint8List.fromList(AesIv.fromRandomBytes().iv))
-            .toList()),
-        64);
+        base64Encode(_cipher!.rsaEncrypt(base64Decode(hexaIv)).toList()), 64);
 
     return base;
   }
@@ -58,14 +55,14 @@ String putrn(String str, int maxlines) {
   return result;
 }
 
-Future<Pronote> getPronoteSession(Neo neo) async {
+Future<Pronote> getPronoteSession(CookieJar cj) async {
   var res = await get(
       Uri.parse(
           "https://ent.l-educdenormandie.fr/cas/login?service=https://0760095R.index-education.net/pronote/"),
       headers: {"referer": "https://ent.l-educdenormandie.fr/"},
-      cookieJar: neo.cookieManager);
+      cookieJar: cj);
 
-  neo.cookieManager.saveFromResponse(
+  cj.saveFromResponse(
       Uri.parse("https://0760095R.index-education.net/pronote/"), res.cookies);
 
   String body = await res.transform(utf8.decoder).join();
@@ -98,11 +95,11 @@ Future<Pronote> getPronoteSession(Neo neo) async {
   Pronote pronote = Pronote(
       Uri.parse("https://0760095R.index-education.net/pronote/"),
       res.redirects[1].location,
-      neo.cookieManager,
+      cj,
       int.parse(map['h']!),
       int.parse(map['a']!));
 
-  Cipher cipher = Cipher(RsaKey(
+  Cipher cipher = Cipher(Rsa.fromNumber(
       exponent: BigInt.parse(map['ER']!),
       modulus: BigInt.parse("0x${map['MR']!}")));
 
@@ -112,6 +109,3 @@ Future<Pronote> getPronoteSession(Neo neo) async {
 
   return pronote;
 }
-
-///LZCDzXx+lt48PyAfA/Wf5CKv2mEdC6CmO8nARBlCzG3+LPEKdXjvvYsw2bbRVkli\r\nMgkleVbTcHAAkVxvGCk9maLJTYFfleL03KbCdwPO9/rl8z4A2O5UrBIn2CDg9oJs\r\nJrJgSOYLeK5QoTxpI1qjf7K1WVlzZC/1wpm2uOjQLRQ=
-///ewfJCLxyXWJ1zobtnFzcDeBaS23D7zCgGpDOiWkELhBdw3ewoLvWETEA7Kv5juNi\r\nH4yamKtn2h0phETgujoD2b3PFXQjHWvTvzXwDEtEASHW6Y4ka5tEDBMSad4Kj/KL\r\n1ciSvp/GBgg9SB0NuFySHzi5IMZDd1j/j2Lzu4vwTdE=

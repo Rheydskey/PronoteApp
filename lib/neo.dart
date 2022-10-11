@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:neo2/classes/http/http.dart';
+import 'package:pronote/http/http.dart';
 
 class Person {
   String id;

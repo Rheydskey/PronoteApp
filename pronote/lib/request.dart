@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:neo2/classes/http/http.dart';
-import 'package:neo2/classes/pronote/crypto.dart';
-import 'package:neo2/classes/pronote/pronote.dart';
-import 'package:neo2/main.dart';
+import 'package:pronote/http/http.dart';
+import 'package:pronote/crypto.dart';
+import 'package:pronote/crypto/aes.dart';
+import 'package:pronote/pronote.dart';
 
 void request(Pronote session, String name,
     {Map<String, dynamic>? content = const {}}) async {
@@ -34,7 +34,7 @@ void request(Pronote session, String name,
       },
       cookieJar: session.cookieManager);
 
-  logger.i(await res.transform(utf8.decoder).join());
+  print(await res.transform(utf8.decoder).join());
 
   session.cookieManager.saveFromResponse(url, res.cookies);
 }

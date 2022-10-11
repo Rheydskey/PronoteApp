@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neo2/classes/neo.dart';
-import 'package:neo2/classes/pronote/pronote.dart';
+import 'package:neo2/neo.dart';
+import 'package:pronote/pronote.dart';
 
 class Logged extends StatefulWidget {
   final Neo neo;
@@ -28,7 +28,7 @@ class _LoggedState extends State<Logged> {
         title: Text(person?.displayName ?? "Loading..."),
         actions: [
           IconButton(
-              onPressed: () => {getPronoteSession(widget.neo)},
+              onPressed: () => {getPronoteSession(widget.neo.cookieManager)},
               icon: const Icon(Icons.refresh))
         ],
       ),

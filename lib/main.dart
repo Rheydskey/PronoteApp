@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
-import 'package:neo2/classes/neo.dart';
+import 'package:neo2/neo.dart';
 import 'package:neo2/logged.dart';
 import 'package:neo2/login.dart';
 import 'package:webview_cookie_manager/webview_cookie_manager.dart';
